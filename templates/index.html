@@ -1,0 +1,68 @@
+<html lang="en">
+<head>
+    <!--
+        Template variable: {{.title}}
+        - Provided by the Go handler when rendering the template.
+        - Example value: "Rate-limited URL Shortener" (shown on the page).
+    -->
+    {{.title}}
+</head>
+<body class="bg-gray-100 font-sans">
+    <!--
+        Container with Tailwind utility classes:
+        - max-w-md: constrain width for readability
+        - mx-auto: center horizontally
+        - mt-20: add top margin
+        - bg-white, p-8, rounded, shadow: visual styling
+    -->
+    <div class="max-w-md mx-auto mt-20 bg-white p-8 rounded shadow">
+        <h1 class="text-2xl mb-4">Rate-limited Shortener</h1>
+
+        <!--
+            The form uses htmx attributes to make a lightweight AJAX POST.
+            - hx-post="/shorten": send a POST request to /shorten when submitted
+            - hx-target="#result": replace the element with id="result" with
+              the server response
+            - hx-swap="innerHTML": perform an innerHTML replacement (default)
+
+            When the form is submitted, only the #result element is updated,
+            which keeps the page responsive without a full reload.
+        -->
+        <form hx-post="/shorten" hx-target="#result" hx-swap="innerHTML">
+            <!--
+                The input's name must match the field read by the server:
+                in main.go the code uses c.PostForm("url") to fetch this value.
+                The `required` attribute prevents empty submissions in the browser.
+            -->
+            <input name="url" placeholder="paste long url" class="border w-full p-2 mb-2" required>
+            <!--
+                The button submits the form. Styling uses Tailwind classes.
+            -->
+            <button class="bg-blue-600 text-white px-4 py-2">Shorten lah</button>
+        </form>
+
+        <!--
+            Result area: the server will return HTML that replaces this div.
+
+            Template behavior:
+            - {{if .short}} ... {{end}} is a Go template conditional. When the
+              handler renders the template and includes a `short` value, the
+              inner paragraph shows the generated short link.
+            - {{.short}} is the short URL string inserted into the template.
+        -->
+        <div id="result" class="mt-6 text-green-600">
+            {{if .short}}
+            <p>Short link: <a href="{{.short}}" class="underline">{{.short}}</a></p>
+            {{end}}
+        </div>
+    </div>
+
+    <!--
+        htmx: tiny library for exchanging HTML with the server via AJAX.
+        This allows the form above to update only a fragment of the page.
+        URL: https://htmx.org/
+    -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+</body>
+</html>
